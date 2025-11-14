@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Υπολογισμός Καθαρού Μισθού 2025</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .result-value {
+            font-weight: 600;
+            color: #00424a; /* primary-dark */
+        }
+        .form-input, .form-select {
+            background-color: #f8fafa; /* neutral-light */
+            border-color: #dbf6fa; /* secondary-light */
+            transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .form-input:focus, .form-select:focus {
+            border-color: #00424a; /* primary-dark */
+            box-shadow: 0 0 0 2px rgba(0, 66, 74, 0.2);
+            outline: none;
+        }
+        .radio-custom:checked {
+            background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='%23edfcff' xmlns='http://www.w3.org/2000/svg'%3e%3ccircle cx='8' cy='8' r='3'/%3e%3c/svg%3e");
+            background-color: #00424a;
+            border-color: #00424a;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary-dark': '#00424a',
+                        'primary-light': '#edfcff',
+                        'secondary-dark': '#273f43',
+                        'secondary-light': '#dbf6fa',
+                        'tertiary-dark': '#2f3b58',
+                        'tertiary-light': '#bac6ea',
+                        'background': '#cde7ec',
+                        'error': '#de3730',
+                        'neutral-dark': '#393c3d',
+                        'neutral-light': '#f8fafa',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-neutral-dark font-sans">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-primary-dark">Υπολογισμός Καθαρού Μισθού 2025</h1>
+            <p class="text-secondary-dark mt-2 max-w-2xl mx-auto">Υπολογίστε τον καθαρό μισθό, τις κρατήσεις και τον φόρο εισοδήματος για την Ελλάδα, βάσει της ισχύουσας νομοθεσίας.</p>
+        </header>
+
+        <main class="max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
+            <div class="lg:col-span-2 bg-primary-light p-6 rounded-xl shadow-lg">
+                <h2 class="text-2xl font-semibold text-primary-dark mb-6 border-b border-secondary-light pb-3">Στοιχεία Υπολογισμού</h2>
+                <form id="calculator-form" class="space-y-5">
+                    <div>
+                        <label for="income" class="block text-sm font-medium text-secondary-dark mb-1">Ακαθάριστο Εισόδημα (€)</label>
+                        <input type="number" id="income" name="income" class="form-input w-full rounded-md border-2 p-2" placeholder="π.χ. 1500.50" required min="0" step="0.01">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-secondary-dark">Περίοδος Εισοδήματος</label>
+                        <div class="mt-2 flex items-center space-x-6 bg-neutral-light p-1 rounded-lg">
+                            <label for="monthly" class="flex-1 text-center cursor-pointer p-2 rounded-md transition-colors" data-type="monthly">
+                                <input type="radio" id="monthly" name="incomeType" value="monthly" class="sr-only" checked>
+                                <span>Μηνιαίο</span>
+                            </label>
+                            <label for="annual" class="flex-1 text-center cursor-pointer p-2 rounded-md transition-colors" data-type="annual">
+                                <input type="radio" id="annual" name="incomeType" value="annual" class="sr-only">
+                                <span>Ετήσιο</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="employment" class="block text-sm font-medium text-secondary-dark mb-1">Εργασιακή Σχέση</label>
+                        <select id="employment" name="employment" class="form-select w-full rounded-md border-2 p-2">
+                            <option value="private">Μισθωτός Ιδιωτικού Τομέα</option>
+                            <option value="public">Μισθωτός Δημοσίου Τομέα</option>
+                            <option value="pensioner">Εργαζόμενος Συνταξιούχος</option>
+                            <option value="freelancer">Ελεύθερος Επαγγελματίας</option>
+                        </select>
+                    </div>
+                    
+                    <div id="freelancer-note" class="hidden text-xs text-tertiary-dark bg-tertiary-light p-3 rounded-md">
+                        Για ελ. επαγγελματίες, εισάγετε το καθαρό εισόδημα (Έσοδα - Έξοδα) πριν την αφαίρεση των ασφαλιστικών εισφορών.
+                    </div>
+
+                    <div>
+                        <label for="children" class="block text-sm font-medium text-secondary-dark mb-1">Αριθμός Εξαρτώμενων Τέκνων</label>
+                        <input type="number" id="children" name="children" class="form-input w-full rounded-md border-2 p-2" value="0" min="0">
+                    </div>
+
+                    <button type="submit" class="w-full bg-secondary-dark text-white font-bold py-3 px-4 rounded-lg hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-dark transition-colors duration-300 shadow-md">
+                        Υπολογισμός
+                    </button>
+                </form>
+            </div>
+
+            <div id="results-container" class="lg:col-span-3 opacity-0 transform -translate-y-4 transition-all duration-500">
+                <div class="bg-primary-light p-6 rounded-xl shadow-lg">
+                    <h2 class="text-2xl font-semibold text-primary-dark mb-6 border-b border-secondary-light pb-3">Ανάλυση Αποτελεσμάτων</h2>
+                    <div id="results-content" class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="text-lg font-semibold text-secondary-dark mb-3">Ετήσια Ανάλυση</h3>
+                            <div class="space-y-2 text-sm bg-neutral-light p-4 rounded-lg">
+                                <div class="flex justify-between"><span>Μικτές Αποδοχές:</span> <span id="annual-gross" class="result-value"></span></div>
+                                <div class="flex justify-between"><span>Κρατήσεις ΕΦΚΑ:</span> <span id="annual-efka" class="result-value"></span></div>
+                                <div class="flex justify-between"><span>Φορολογητέο Εισόδημα:</span> <span id="annual-taxable" class="result-value"></span></div>
+                                <div class="flex justify-between"><span>Φόρος Εισοδήματος:</span> <span id="annual-tax" class="result-value"></span></div>
+                                <hr class="my-2 border-secondary-light">
+                                <div class="flex justify-between text-base font-bold"><span>Καθαρό Εισόδημα:</span> <span id="annual-net" class="text-primary-dark text-lg"></span></div>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-secondary-dark mb-3">Μηνιαία Ανάλυση</h3>
+                            <div class="space-y-2 text-sm bg-neutral-light p-4 rounded-lg">
+                                <div class="flex justify-between"><span>Μικτές Αποδοχές:</span> <span id="monthly-gross" class="result-value"></span></div>
+                                <div class="flex justify-between"><span>Κρατήσεις ΕΦΚΑ:</span> <span id="monthly-efka" class="result-value"></span></div>
+                                <div class="flex justify-between"><span>Φορολογητέο Εισόδημα:</span> <span id="monthly-taxable" class="result-value"></span></div>
+                                <div class="flex justify-between"><span>Φόρος Εισοδήματος:</span> <span id="monthly-tax" class="result-value"></span></div>
+                                <hr class="my-2 border-secondary-light">
+                                <div class="flex justify-between text-base font-bold"><span>Καθαρό Εισόδημα:</span> <span id="monthly-net" class="text-primary-dark text-lg"></span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-6 text-center">Οι υπολογισμοί αποτελούν εκτίμηση και βασίζονται στην φορολογική νομοθεσία του 2024. Δεν υπολογίζεται η Ειδική Εισφορά Αλληλεγγύης.</p>
+                </div>
+            </div>
+             <div id="initial-message" class="lg:col-span-3 flex items-center justify-center bg-primary-light/50 p-6 rounded-xl border-2 border-dashed border-secondary-light">
+                <p class="text-center text-secondary-dark">Τα αποτελέσματα θα εμφανιστούν εδώ μετά τον υπολογισμό.</p>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('calculator-form');
+            const employmentSelect = document.getElementById('employment');
+            const freelancerNote = document.getElementById('freelancer-note');
+            const resultsContainer = document.getElementById('results-container');
+            const initialMessage = document.getElementById('initial-message');
+            const incomeTypeLabels = document.querySelectorAll('label[data-type]');
+
+            // --- UI INTERACTIONS ---
+
+            employmentSelect.addEventListener('change', () => {
+                if (employmentSelect.value === 'freelancer') {
+                    freelancerNote.classList.remove('hidden');
+                } else {
+                    freelancerNote.classList.add('hidden');
+                }
+            });
+
+            // --- (Η ΔΙΟΡΘΩΣΗ ΕΙΝΑΙ ΕΔΩ) ---
+            // Custom radio button styling
+            incomeTypeLabels.forEach(label => {
+                label.addEventListener('click', () => {
+                    // 1. Remove style from all labels
+                    incomeTypeLabels.forEach(l => {
+                        l.classList.remove('bg-secondary-dark', 'text-white');
+                    });
+                    
+                    // 2. Add style to the clicked label
+                    label.classList.add('bg-secondary-dark', 'text-white');
+                    
+                    // 3. Find the ID from the 'for' attribute
+                    const inputId = label.getAttribute('for');
+                    if (inputId) {
+                        // 4. Get the actual radio button and check it
+                        const inputElement = document.getElementById(inputId);
+                        if (inputElement) {
+                            inputElement.checked = true;
+                        }
+                    }
+                });
+            });
+            // --- (ΤΕΛΟΣ ΔΙΟΡΘΩΣΗΣ) ---
+
+            document.querySelector('label[data-type="monthly"]').classList.add('bg-secondary-dark', 'text-white');
+
+
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                
+                const incomeInput = parseFloat(document.getElementById('income').value);
+                const incomeType = document.querySelector('input[name="incomeType"]:checked').value;
+                const employment = document.getElementById('employment').value;
+                const children = parseInt(document.getElementById('children').value);
+
+                if (isNaN(incomeInput) || incomeInput <= 0) {
+                    alert('Παρακαλώ εισάγετε ένα έγκυρο ποσό εισοδήματος.');
+                    return;
+                }
+
+                calculate(incomeInput, incomeType, employment, children);
+            });
+
+            // --- CALCULATION LOGIC ---
+
+            const formatCurrency = (value) => {
+                return value.toLocaleString('el-GR', { style: 'currency', currency: 'EUR' });
+            };
+
+            function calculate(incomeInput, incomeType, employment, children) {
+                
+                const EFKA_RATES = {
+                    private: 0.1387,
+                    public: 0.1412,
+                    pensioner: 0.1412 + 0.10, // Employee + Pensioner contribution
+                };
+
+                const TAX_BRACKETS = [
+                    { limit: 10000, rate: 0.09 },
+                    { limit: 20000, rate: 0.22 },
+                    { limit: 30000, rate: 0.28 },
+                    { limit: 40000, rate: 0.36 },
+                    { limit: Infinity, rate: 0.44 }
+                ];
+
+                
+                let months = 12;
+                if (employment === 'private' || employment === 'pensioner') {
+                    months = 14;
+                }
+
+                let monthlyGross, annualGross;
+                
+                if (incomeType === 'monthly') {
+                    monthlyGross = incomeInput;
+                    annualGross = monthlyGross * months;
+                } else { // annual
+                    annualGross = incomeInput;
+                    monthlyGross = annualGross / months;
+                }
+
+                // Step 2: Calculate Annual EFKA
+                let annualEFKA = 0;
+                if (employment === 'freelancer') {
+                    annualEFKA = 2940; 
+                } else {
+                    let monthlyEFKA_calc = monthlyGross * EFKA_RATES[employment];
+                    annualEFKA = monthlyEFKA_calc * months;
+                }
+                
+                // Step 3: Calculate Annual Taxable Income
+                let annualTaxable = Math.max(0, annualGross - annualEFKA);
+                
+                // Step 4: Calculate Raw Income Tax
+                let rawTax = 0;
+                let remainingIncome = annualTaxable;
+                let previousLimit = 0;
+
+                for (const bracket of TAX_BRACKETS) {
+                    if (remainingIncome > 0) {
+                        const taxableInBracket = Math.min(remainingIncome, bracket.limit - previousLimit);
+                        rawTax += taxableInBracket * bracket.rate;
+                        remainingIncome -= taxableInBracket;
+                        previousLimit = bracket.limit;
+                    } else {
+                        break;
+                    }
+                }
+
+                // Step 5: Calculate Tax Credit
+                let taxCredit = 0;
+                if (employment !== 'freelancer') {
+                    let baseCredit = 0;
+                    switch (children) {
+                        case 0: baseCredit = 777; break;
+                        case 1: baseCredit = 900; break;
+                        case 2: baseCredit = 1120; break;
+                        case 3: baseCredit = 1340; break;
+                        case 4: baseCredit = 1580; break;
+                        case 5: baseCredit = 1780; break;
+                        default: baseCredit = 1780 + (children - 5) * 220; break;
+                    }
+
+                    if (annualTaxable > 12000 && children < 5) { 
+                        const reduction = Math.floor((annualTaxable - 12000) / 1000) * 20;
+                        baseCredit = Math.max(0, baseCredit - reduction);
+                    }
+                    taxCredit = baseCredit;
+                }
+                
+                // Step 6: Calculate Final Tax
+                const finalAnnualTax = Math.max(0, rawTax - taxCredit);
+
+                // Step 7: Calculate Net Income
+                const annualNet = annualGross - annualEFKA - finalAnnualTax;
+
+                
+                let displayMonthlyGross, displayMonthlyEfka, displayMonthlyTaxable, displayMonthlyTax, displayMonthlyNet;
+
+                if (incomeType === 'monthly') {
+                    // Αν ο χρήστης έδωσε ΜΗΝΙΑΙΟ
+                    displayMonthlyGross = incomeInput; 
+                    displayMonthlyEfka = annualEFKA / months;
+                    displayMonthlyTaxable = annualTaxable / months;
+                    displayMonthlyTax = finalAnnualTax / months;
+                    displayMonthlyNet = displayMonthlyGross - displayMonthlyEfka - displayMonthlyTax;
+                } else {
+                    // Αν ο χρήστης έδωσε ΕΤΗΣΙΟ
+                    displayMonthlyGross = annualGross / months; 
+                    displayMonthlyEfka = annualEFKA / months; 
+                    displayMonthlyTaxable = annualTaxable / months; 
+                    displayMonthlyTax = finalAnnualTax / months;
+                    displayMonthlyNet = displayMonthlyGross - displayMonthlyEfka - displayMonthlyTax;
+                }
+
+                // Step 9: Display Results
+                displayResults({
+                    annualGross, annualEFKA, annualTaxable, finalAnnualTax, annualNet,
+                    displayMonthlyGross, displayMonthlyEfka, displayMonthlyTaxable, displayMonthlyTax, displayMonthlyNet
+                });
+            }
+
+            function displayResults(data) {
+                // Ετήσια Κάρτα
+                document.getElementById('annual-gross').textContent = formatCurrency(data.annualGross);
+                document.getElementById('annual-efka').textContent = `- ${formatCurrency(data.annualEFKA)}`;
+                document.getElementById('annual-taxable').textContent = formatCurrency(data.annualTaxable);
+                document.getElementById('annual-tax').textContent = `- ${formatCurrency(data.finalAnnualTax)}`;
+                document.getElementById('annual-net').textContent = formatCurrency(data.annualNet);
+
+                // Μηνιαία Κάρτα
+                document.getElementById('monthly-gross').textContent = formatCurrency(data.displayMonthlyGross);
+                document.getElementById('monthly-efka').textContent = `- ${formatCurrency(data.displayMonthlyEfka)}`;
+                document.getElementById('monthly-taxable').textContent = formatCurrency(data.displayMonthlyTaxable);
+                document.getElementById('monthly-tax').textContent = `- ${formatCurrency(data.displayMonthlyTax)}`;
+                document.getElementById('monthly-net').textContent = formatCurrency(data.displayMonthlyNet);
+
+                initialMessage.classList.add('hidden');
+                resultsContainer.classList.remove('opacity-0', '-translate-y-4');
+                
+                if (window.innerWidth < 1024) {
+                    resultsContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+        });
+    </script>
+
+</body>
+</html>
